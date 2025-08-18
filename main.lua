@@ -28,6 +28,7 @@ local current_num           -- 当前选中道具索引
 local current_sprite        -- 当前选中道具精灵
 local chose_type            -- 0-- 当前选中类型（1：背包道具，2：转换桌道具，3：按钮 ，4：设置键）
 local emc_num = 100
+local temp_fire_delay
 local stastic_pos
 local items_table = {}                     --背包道具表
 local switch_table = {}                    --桌中有的道具
@@ -48,6 +49,8 @@ function EE:TAB_Switch() --TAB模式切换
         if player:HasCollectible(trans_table) then
             if Input.IsButtonTriggered(settings.tab_confirm_key, player.ControllerIndex) and not Input.IsButtonPressed(Keyboard.KEY_LEFT_CONTROL, player.ControllerIndex) then
                 Tab_Confirm = not Tab_Confirm
+                player:AddCacheFlags(CacheFlag.CACHE_FIREDELAY)
+                player:EvaluateItems() -- 现在“MC_EVALUATE_CACHE”回调将触发。
                 anm_load = true
                 if not Tab_Confirm then
                     if EID and settings.EID_connect_confirm then
@@ -61,6 +64,22 @@ end
 
 EE:AddCallback(ModCallbacks.MC_POST_RENDER, EE.TAB_Switch)
 
+
+function EE:Ban_Fire_in_Bag(player) --打开背包时关闭攻击（伪）
+    if player:HasCollectible(trans_table) then
+        if not temp_fire_delay then
+            temp_fire_delay = player.FireDelay
+        end
+        if Tab_Confirm then
+            temp_fire_delay = player.FireDelay
+            player.FireDelay = 2000
+        elseif not Tab_Confirm then
+            player.FireDelay = temp_fire_delay
+        end
+    end
+end
+
+EE:AddCallback(ModCallbacks.MC_EVALUATE_CACHE, EE.Ban_Fire_in_Bag, CacheFlag.CACHE_FIREDELAY)
 function EE:TAB_UI_Render() --按下Tab后UI渲染
     if Tab_Confirm then
         if not setting_ui_open then
@@ -215,9 +234,20 @@ function EE:Remove_Add() --道具买卖/UI交互
                                     switch_table[current_num + (switch_page_index - 1) * 17], nil, true))
                             end
                         elseif Mouse_Pos_Pos_Check(Input.GetMousePosition(true), item_render, 1) and btn_pre and not Input.IsMouseBtnPressed(Mouse.MOUSE_BUTTON_LEFT) then --买出成功
-                            if emc_num > emc_table[switch_table[current_num + (switch_page_index - 1) * 17]] then
-                                emc_num = emc_num - emc_table[switch_table[current_num + (switch_page_index - 1) * 17]]
-                                player:AddCollectible(switch_table[current_num + (switch_page_index - 1) * 17], 0, true)
+                            if emc_num >= emc_table[switch_table[current_num + (switch_page_index - 1) * 17]] then
+                                if player:GetPlayerType() == PlayerType.PLAYER_ISAAC_B then
+                                    if T_Isaac_less_than_8(player) then
+                                        emc_num = emc_num -
+                                            emc_table[switch_table[current_num + (switch_page_index - 1) * 17]]
+                                        player:AddCollectible(switch_table[current_num + (switch_page_index - 1) * 17], 6,
+                                            false)
+                                    end
+                                else
+                                    emc_num = emc_num -
+                                        emc_table[switch_table[current_num + (switch_page_index - 1) * 17]]
+                                    player:AddCollectible(switch_table[current_num + (switch_page_index - 1) * 17], 6,
+                                        false)
+                                end
                             end
                             if EID and settings.EID_connect_confirm then
                                 EID:hidePermanentText()
@@ -438,9 +468,15 @@ function Data_Load(_, isContinued) --数据加载
             switch_table = {}
         end
     end
+    ---@diagnostic disable-next-line: undefined-field
+    for col_i = 1, Isaac.GetItemConfig():GetCollectibles().Size - 1 do
+        if ItemConfig.Config.IsValidCollectible(col_i) and col_i > 732 then
+            emc_table[col_i] = (Isaac.GetItemConfig():GetCollectible(col_i).Quality + 1) * 20
+        end
+    end
 end
 
-EE:AddCallback(ModCallbacks.MC_POST_GAME_STARTED, Data_Load)
+EE:AddPriorityCallback(ModCallbacks.MC_POST_GAME_STARTED, 0.01,Data_Load)
 function EE:ST_Beginning(_, bool) --开局生成转换桌
     for i = 0, Game():GetNumPlayers() - 1 do
         local player = Game():GetPlayer(i)
@@ -466,6 +502,17 @@ function EE:Data_Save() --数据保存
 end
 
 EE:AddCallback(ModCallbacks.MC_PRE_GAME_EXIT, EE.Data_Save, true)
+function EE:Mod_EMC_Refresh()
+    switch_table = {}
+    emc_table = emc_table_init
+    Data.emc_table = emc_table
+    Data.emc_num = emc_num
+    Data.switch_table = switch_table
+    Data.settings = settings
+    EE:SaveData(json.encode(Data))
+end
+
+EE:AddCallback(ModCallbacks.MC_PRE_MOD_UNLOAD, EE.Mod_EMC_Refresh)
 function Mouse_Pos_But_Check(Mouse_Pos, Aim_pos, i) --检测鼠标位置（即在某小格）
     local mous_pos = Isaac.WorldToScreen(Mouse_Pos)
     if i == 1 then
@@ -485,7 +532,7 @@ function Mouse_Pos_But_Check(Mouse_Pos, Aim_pos, i) --检测鼠标位置（即�
             end
         end
     elseif i == 3 then
-        if mous_pos.X >= Aim_pos.X and mous_pos.X <= Aim_pos.X + 50 then
+        if mous_pos.X >= Aim_pos.X and mous_pos.X <= Aim_pos.X + 72 then
             if mous_pos.Y >= Aim_pos.Y and mous_pos.Y <= Aim_pos.Y + 20 then
                 return true
             else
@@ -501,16 +548,33 @@ EE:AddCallback(ModCallbacks.MC_POST_PICKUP_UPDATE, function(_, pickup)
             for index = 0, Game():GetNumPlayers() - 1 do
                 local player = Isaac.GetPlayer(index)
                 local price = pickup.Price
-                if price >= 0 and player:HasCollectible(64) then
-                    local itemnum = player:GetCollectibleNum(64)
-                    local ori_price = InferOriginalPrice(itemnum, price)
-                    pickup.Price = ori_price[1]
+                if pickup.SubType == trans_table then
+                    if price >= 0 and player:HasCollectible(64) then
+                        local itemnum = player:GetCollectibleNum(64)
+                        local ori_price = InferOriginalPrice(itemnum, price)
+                        pickup.Price = ori_price[1]
+                    end
                 end
             end
         end
     end
 end)
 
+function T_Isaac_less_than_8(player) --堕化以撒道具数检测
+    local num = 0
+    for col_i = 1, Isaac.GetItemConfig():GetCollectibles().Size - 1 do
+        if ItemConfig.Config.IsValidCollectible(col_i) then
+            for has_i = 1, player:GetCollectibleNum(col_i, true) do
+                num = num + 1
+            end
+        end
+    end
+    if num < 8 then
+        return true
+    else
+        return false
+    end
+end
 
 function Mouse_Pos_Pos_Check(Mouse_Pos, table, i) --检测鼠标位置（即在某区域）
     local mous_pos = Isaac.WorldToScreen(Mouse_Pos)
@@ -597,5 +661,5 @@ function InferOriginalPrice(couponCount, discountedPrice) --原价计算函数
 end
 
 if EID then
-    EID:addCollectible(trans_table,"神秘炼金学的产物，比里该隐的袋子强多了","转换桌","zh_cn")
+    EID:addCollectible(trans_table, "神秘炼金学的产物，比里该隐的袋子强多了", "转换桌", "zh_cn")
 end

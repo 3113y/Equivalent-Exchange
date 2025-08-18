@@ -2,17 +2,20 @@
     <Pool Name="boss">
         <Item Name="Transmutation Tablet" Weight="0.2" DecreaseBy="1" RemoveOn="0.1"/>
 
-    </Pool> 
-    <Pool Name="treasure"> 
+    </Pool>
+    <Pool Name="treasure">
         <Item Name="Transmutation Tablet" Weight="0.5" DecreaseBy="0.5" RemoveOn="0.1"/>
 
     </Pool>
-    <Pool Name="shop"> 
+    <Pool Name="shop">
         <Item Name="Transmutation Tablet" Weight="0.5" DecreaseBy="0.5" RemoveOn="0.1"/>
 
     </Pool>
-    <Pool Name="secret"> 
+    <Pool Name="secret">
         <Item Name="Transmutation Tablet" Weight="0.1" DecreaseBy="1" RemoveOn="0.1"/>
 
+    </Pool>
+    <Pool Name="devil">
+        <Item Name="Transmutation Tablet" Weight="0.2" DecreaseBy="1" RemoveOn="0.1"/>
     </Pool>
 </ItemPools>
