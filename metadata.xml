@@ -2,8 +2,10 @@
 <metadata>
     <name>Equivalent Exchange</name>
     <directory>equivalent exchange</directory>
-    <id>3550031820</id>
-    <description>only upload for few minutes to test</description>
-    <version>1.4</version>
-    <visibility>Friends Only</visibility>
+    <id>3552036966</id>
+    <description></description>
+    <version>1.1</version>
+    <visibility>Public</visibility>
+    <tag id="Lua"/>
+    <tag id="Items"/>
 </metadata>
