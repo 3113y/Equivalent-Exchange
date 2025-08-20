@@ -235,13 +235,15 @@ function EE:Remove_Add() --道具买卖/UI交互
                                     if T_Isaac_less_than_8(player) then
                                         emc_num = emc_num -
                                             emc_table[switch_table[current_num + (switch_page_index - 1) * 17]]
-                                        player:AddCollectible(switch_table[current_num + (switch_page_index - 1) * 17], 6,
+                                        player:AddCollectible(switch_table[current_num + (switch_page_index - 1) * 17], 0,
                                             false)
                                     end
+                                elseif (player:GetPlayerType() == PlayerType.PLAYER_BLUEBABY_B and not player:HasCollectible(715) and switch_table[current_num + (switch_page_index - 1) * 17] == 715) or (player:GetPlayerType() ==PlayerType.PLAYER_CAIN_B and not player:HasCollectible(710) and switch_table[current_num + (switch_page_index - 1) * 17] ==710) or (player:GetPlayerType()==PlayerType.PLAYER_MAGDALENE_B and not player:HasCollectible(45) and switch_table[current_num + (switch_page_index - 1) * 17] == 45)then
+                                    player:AddCollectible(switch_table[current_num + (switch_page_index - 1) * 17],0,false,2,0)
                                 else
                                     emc_num = emc_num -
                                         emc_table[switch_table[current_num + (switch_page_index - 1) * 17]]
-                                    player:AddCollectible(switch_table[current_num + (switch_page_index - 1) * 17], 6,
+                                    player:AddCollectible(switch_table[current_num + (switch_page_index - 1) * 17], 0,
                                         false)
                                 end
                             end
@@ -403,6 +405,7 @@ function EE:Anm2Load() --anm2 sheet的替换
                 anm.sprite:ReplaceSpritesheet(0,
                     Isaac.GetItemConfig():GetCollectible(items_table[i + (bag_page_index - 1) * 27])
                     .GfxFileName, true)
+                    anm.sprite:LoadGraphics()
             end
         end
         for i, anm in pairs(switch_render) do
@@ -410,6 +413,7 @@ function EE:Anm2Load() --anm2 sheet的替换
                 anm.sprite:ReplaceSpritesheet(0,
                     Isaac.GetItemConfig():GetCollectible(switch_table[i + (switch_page_index - 1) * 17]).GfxFileName,
                     true)
+                    anm.sprite:LoadGraphics()
             end
         end
         anm_load = false
