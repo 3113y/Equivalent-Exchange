@@ -37,7 +37,7 @@ local temp_fire_delay
 local stastic_pos
 local items_table = {}                     --背包道具表
 local switch_table = {}                    --桌中有的道具
-emc_table = {}                       --EMC值表
+emc_table = {}                             --EMC值表
 local settings = {
     switch_table_permenent_memory = false, --转换桌道具是否永久记忆
     tab_confirm_key = Keyboard.KEY_TAB,    --Tab键位
@@ -91,7 +91,7 @@ function EE:TAB_UI_Render() --按下Tab后UI渲染
             end
             setting_button:Render(Vector(230, 0) + stastic_pos)
             font:DrawStringUTF8("EMC:" .. emc_num, stastic_pos.X + 25 + #tostring(emc_num) * 3, stastic_pos.Y + 100,
-            KColor.White, 1, true)
+                KColor.White, 1, true)
         elseif setting_ui_open then
             setting_ui:Render(stastic_pos)
             for i, o in pairs(numberString) do
@@ -103,63 +103,63 @@ function EE:TAB_UI_Render() --按下Tab后UI渲染
             end
             if Options.Language == "zh" then
                 if settings.switch_table_permenent_memory then
-                    font_cn:DrawStringUTF8("转换桌道具记忆：永久", (stastic_pos + settings_render[4].pos).X + 67,
-                        (stastic_pos + settings_render[4].pos).Y, KColor.White, 1, true)
+                    font_cn:DrawStringUTF8("转换桌道具记忆：永久", (stastic_pos + settings_render[5].pos).X + 67,
+                        (stastic_pos + settings_render[5].pos).Y, KColor.White, 1, true)
                 else
-                    font_cn:DrawStringUTF8("转换桌道具记忆：本局", (stastic_pos + settings_render[4].pos).X + 67,
-                        (stastic_pos + settings_render[4].pos).Y, KColor.White, 1, true)
+                    font_cn:DrawStringUTF8("转换桌道具记忆：本局", (stastic_pos + settings_render[5].pos).X + 67,
+                        (stastic_pos + settings_render[5].pos).Y, KColor.White, 1, true)
                 end
                 if settings.EID_connect_confirm then
-                    font_cn:DrawStringUTF8("EID联动：开启", (stastic_pos + settings_render[5].pos).X + 48,
-                        (stastic_pos + settings_render[5].pos).Y, KColor.White, 1, true)
+                    font_cn:DrawStringUTF8("EID联动：开启", (stastic_pos + settings_render[6].pos).X + 48,
+                        (stastic_pos + settings_render[6].pos).Y, KColor.White, 1, true)
                 else
-                    font_cn:DrawStringUTF8("EID联动：关闭", (stastic_pos + settings_render[5].pos).X + 48,
-                        (stastic_pos + settings_render[5].pos).Y, KColor.White, 1, true)
+                    font_cn:DrawStringUTF8("EID联动：关闭", (stastic_pos + settings_render[6].pos).X + 48,
+                        (stastic_pos + settings_render[6].pos).Y, KColor.White, 1, true)
                 end
                 if settings.tab_confirm_key == Keyboard.KEY_TAB then
-                    font_cn:DrawStringUTF8("背包开启键位：Tab", (stastic_pos + settings_render[6].pos).X + 60,
-                        (stastic_pos + settings_render[6].pos).Y, KColor.White, 1, true)
+                    font_cn:DrawStringUTF8("背包开启键位：Tab", (stastic_pos + settings_render[7].pos).X + 60,
+                        (stastic_pos + settings_render[7].pos).Y, KColor.White, 1, true)
                 elseif settings.tab_confirm_key == Keyboard.KEY_RIGHT_CONTROL then
-                    font_cn:DrawStringUTF8("背包开启键位：右Ctrl", (stastic_pos + settings_render[6].pos).X + 65,
-                        (stastic_pos + settings_render[6].pos).Y, KColor.White, 1, true)
+                    font_cn:DrawStringUTF8("背包开启键位：右Ctrl", (stastic_pos + settings_render[7].pos).X + 65,
+                        (stastic_pos + settings_render[7].pos).Y, KColor.White, 1, true)
                 end
                 if settings.switch_table_spawn then
-                    font_cn:DrawStringUTF8("开局生成转换桌：是", (stastic_pos + settings_render[7].pos).X + 62,
-                        (stastic_pos + settings_render[7].pos).Y, KColor.White, 1, true)
+                    font_cn:DrawStringUTF8("开局生成转换桌：是", (stastic_pos + settings_render[8].pos).X + 62,
+                        (stastic_pos + settings_render[8].pos).Y, KColor.White, 1, true)
                 else
-                    font_cn:DrawStringUTF8("开局生成转换桌：否", (stastic_pos + settings_render[7].pos).X + 62,
-                        (stastic_pos + settings_render[7].pos).Y, KColor.White, 1, true)
+                    font_cn:DrawStringUTF8("开局生成转换桌：否", (stastic_pos + settings_render[8].pos).X + 62,
+                        (stastic_pos + settings_render[8].pos).Y, KColor.White, 1, true)
                 end
             else
                 if settings.switch_table_permenent_memory then
-                    font:DrawStringUTF8("Switch Table Memory: Permanent", (stastic_pos + settings_render[4].pos).X + 109,
-                        (stastic_pos + settings_render[4].pos).Y + 1, KColor.White, 1, true)
+                    font:DrawStringUTF8("Switch Table Memory: Permanent", (stastic_pos + settings_render[5].pos).X + 109,
+                        (stastic_pos + settings_render[5].pos).Y + 1, KColor.White, 1, true)
                 else
-                    font:DrawStringUTF8("Switch Table Memory: This Game", (stastic_pos + settings_render[4].pos).X + 109,
-                        (stastic_pos + settings_render[4].pos).Y + 1, KColor.White, 1, true)
+                    font:DrawStringUTF8("Switch Table Memory: This Game", (stastic_pos + settings_render[5].pos).X + 109,
+                        (stastic_pos + settings_render[5].pos).Y + 1, KColor.White, 1, true)
                 end
                 if settings.EID_connect_confirm then
-                    font:DrawStringUTF8("EID Connection:on", (stastic_pos + settings_render[5].pos).X + 70,
-                        (stastic_pos + settings_render[5].pos).Y + 1, KColor.White, 1, true)
+                    font:DrawStringUTF8("EID Connection:on", (stastic_pos + settings_render[6].pos).X + 70,
+                        (stastic_pos + settings_render[6].pos).Y + 1, KColor.White, 1, true)
                 else
-                    font:DrawStringUTF8("EID Connection:off", (stastic_pos + settings_render[5].pos).X + 73,
-                        (stastic_pos + settings_render[5].pos).Y + 1, KColor.White, 1, true)
+                    font:DrawStringUTF8("EID Connection:off", (stastic_pos + settings_render[6].pos).X + 73,
+                        (stastic_pos + settings_render[6].pos).Y + 1, KColor.White, 1, true)
                 end
                 if settings.tab_confirm_key == Keyboard.KEY_TAB then
-                    font:DrawStringUTF8("Keyboard to open bag :Tab", (stastic_pos + settings_render[6].pos).X + 94,
-                        (stastic_pos + settings_render[6].pos).Y + 1, KColor.White, 1, true)
+                    font:DrawStringUTF8("Keyboard to open bag :Tab", (stastic_pos + settings_render[7].pos).X + 94,
+                        (stastic_pos + settings_render[7].pos).Y + 1, KColor.White, 1, true)
                 elseif settings.tab_confirm_key == Keyboard.KEY_RIGHT_CONTROL then
                     font:DrawStringUTF8("Keyboard to open bag :Right Ctrl",
-                        (stastic_pos + settings_render[6].pos).X + 115,
-                        (stastic_pos + settings_render[6].pos).Y + 1, KColor.White, 1, true)
+                        (stastic_pos + settings_render[7].pos).X + 115,
+                        (stastic_pos + settings_render[7].pos).Y + 1, KColor.White, 1, true)
                 end
                 if settings.switch_table_spawn then
                     font:DrawStringUTF8("Spawn Trans Tablet in begin: Yes",
-                        (stastic_pos + settings_render[7].pos).X + 114,
-                        (stastic_pos + settings_render[7].pos).Y + 1, KColor.White, 1, true)
+                        (stastic_pos + settings_render[8].pos).X + 114,
+                        (stastic_pos + settings_render[8].pos).Y + 1, KColor.White, 1, true)
                 else
-                    font:DrawStringUTF8("Spawn Trans Tablet in begin: No", (stastic_pos + settings_render[7].pos).X + 111,
-                        (stastic_pos + settings_render[7].pos).Y + 1, KColor.White, 1, true)
+                    font:DrawStringUTF8("Spawn Trans Tablet in begin: No", (stastic_pos + settings_render[8].pos).X + 111,
+                        (stastic_pos + settings_render[8].pos).Y + 1, KColor.White, 1, true)
                 end
             end
         end
@@ -198,7 +198,12 @@ function EE:Remove_Add() --道具买卖/UI交互
                                     items_table[current_num + (bag_page_index - 1) * 27], nil, true))
                             end
                         elseif Mouse_Pos_But_Check(Input.GetMousePosition(true), sell_pos + stastic_pos, 2) and btn_pre and not Input.IsMouseBtnPressed(Mouse.MOUSE_BUTTON_LEFT) then --卖掉背包道具
-                            player:RemoveCollectible(items_table[current_num + (bag_page_index - 1) * 27], true)
+                            if Isaac.GetItemConfig():GetCollectible(items_table[current_num + (bag_page_index - 1) * 27]):HasTags(ItemConfig.TAG_BOOK) then
+                                player:RemoveCollectible(items_table[current_num + (bag_page_index - 1) * 27], true,
+                                    ActiveSlot.SLOT_PRIMARY, false)
+                            else
+                                player:RemoveCollectible(items_table[current_num + (bag_page_index - 1) * 27], true)
+                            end
                             emc_num = emc_table[items_table[current_num + (bag_page_index - 1) * 27]] + emc_num
                             if emc_num >= 2147483647 then
                                 emc_num = 2147483647
@@ -238,8 +243,9 @@ function EE:Remove_Add() --道具买卖/UI交互
                                         player:AddCollectible(switch_table[current_num + (switch_page_index - 1) * 17], 0,
                                             false)
                                     end
-                                elseif (player:GetPlayerType() == PlayerType.PLAYER_BLUEBABY_B and not player:HasCollectible(715) and switch_table[current_num + (switch_page_index - 1) * 17] == 715) or (player:GetPlayerType() ==PlayerType.PLAYER_CAIN_B and not player:HasCollectible(710) and switch_table[current_num + (switch_page_index - 1) * 17] ==710) or (player:GetPlayerType()==PlayerType.PLAYER_MAGDALENE_B and not player:HasCollectible(45) and switch_table[current_num + (switch_page_index - 1) * 17] == 45)then
-                                    player:AddCollectible(switch_table[current_num + (switch_page_index - 1) * 17],0,false,2,0)
+                                elseif (player:GetPlayerType() == PlayerType.PLAYER_BLUEBABY_B and not player:HasCollectible(715) and switch_table[current_num + (switch_page_index - 1) * 17] == 715) or (player:GetPlayerType() == PlayerType.PLAYER_CAIN_B and not player:HasCollectible(710) and switch_table[current_num + (switch_page_index - 1) * 17] == 710) or (player:GetPlayerType() == PlayerType.PLAYER_MAGDALENE_B and not player:HasCollectible(45) and switch_table[current_num + (switch_page_index - 1) * 17] == 45) then
+                                    player:AddCollectible(switch_table[current_num + (switch_page_index - 1) * 17], 0,
+                                        false, 2, 0)
                                 else
                                     emc_num = emc_num -
                                         emc_table[switch_table[current_num + (switch_page_index - 1) * 17]]
@@ -326,7 +332,7 @@ function EE:Remove_Add() --道具买卖/UI交互
                         setting_index = 2
                     elseif btn_pre and not Input.IsMouseBtnPressed(Mouse.MOUSE_BUTTON_LEFT) and setting_index == 2 then
                         settings_render[current_num].sprite:Play("Idle", true)
-                        if current_num == 3 then
+                        if current_num == 4 then
                             setting_ui_open = false
                             EID_Render = false
                             if EID and settings.EID_connect_confirm then
@@ -348,17 +354,26 @@ function EE:Remove_Add() --道具买卖/UI交互
                                 EID:hidePermanentText()
                                 numberString = { [1] = "", [2] = "", }
                             end
-                        elseif current_num == 4 then
-                            settings.switch_table_permenent_memory = not settings.switch_table_permenent_memory
+                        elseif current_num == 3 then
+                            if emc_table[tonumber(numberString[1])] then
+                                emc_table[tonumber(numberString[1])] = emc_table_init[tonumber(numberString[1])] or
+                                mod_emc_table_init[tonumber(numberString[1])] or
+                                (Isaac.GetItemConfig():GetCollectible(tonumber(numberString[1]) or 1).Quality + 1) * 20
+                                EID_Render = false
+                                EID:hidePermanentText()
+                                numberString = { [1] = "", [2] = "", }
+                            end
                         elseif current_num == 5 then
-                            settings.EID_connect_confirm = not settings.EID_connect_confirm
+                            settings.switch_table_permenent_memory = not settings.switch_table_permenent_memory
                         elseif current_num == 6 then
+                            settings.EID_connect_confirm = not settings.EID_connect_confirm
+                        elseif current_num == 7 then
                             if settings.tab_confirm_key == Keyboard.KEY_TAB then
                                 settings.tab_confirm_key = Keyboard.KEY_RIGHT_CONTROL
                             else
                                 settings.tab_confirm_key = Keyboard.KEY_TAB
                             end
-                        elseif current_num == 7 then
+                        elseif current_num == 8 then
                             settings.switch_table_spawn = not settings.switch_table_spawn
                         end
                         btn_pre = false
@@ -405,7 +420,7 @@ function EE:Anm2Load() --anm2 sheet的替换
                 anm.sprite:ReplaceSpritesheet(0,
                     Isaac.GetItemConfig():GetCollectible(items_table[i + (bag_page_index - 1) * 27])
                     .GfxFileName, true)
-                    anm.sprite:LoadGraphics()
+                anm.sprite:LoadGraphics()
             end
         end
         for i, anm in pairs(switch_render) do
@@ -413,7 +428,7 @@ function EE:Anm2Load() --anm2 sheet的替换
                 anm.sprite:ReplaceSpritesheet(0,
                     Isaac.GetItemConfig():GetCollectible(switch_table[i + (switch_page_index - 1) * 17]).GfxFileName,
                     true)
-                    anm.sprite:LoadGraphics()
+                anm.sprite:LoadGraphics()
             end
         end
         anm_load = false
@@ -703,4 +718,4 @@ if EID then
     EID:addCollectible(trans_table, "神秘炼金学的产物，比里该隐的袋子强多了", "转换桌", "zh_cn")
 end
 
-EE:Set_Item_EMC_By_Id({[trans_table]=0})
+EE:Set_Item_EMC_By_Id({ [trans_table] = 0 })

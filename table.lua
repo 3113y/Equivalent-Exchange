@@ -61,6 +61,11 @@ settings_render = {
         pos = Vector(105, 27)
     },
     {
+        name = "reset",
+        sprite = Sprite(),
+        pos = Vector(105, 8)
+    },
+    {
         name = "back",
         sprite = Sprite(),
         pos = Vector(207, 5)
