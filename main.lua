@@ -10,6 +10,7 @@ local setting_ui = Sprite()
 local switch_item = Sprite()
 local bag_item = Sprite()
 local setting_button = Sprite()
+local search_button = Sprite()
 local writing_spark = Sprite()
 local font = Font()
 local font_cn = Font()
@@ -21,22 +22,24 @@ local setting_ui_open = false
 local EID_Render = false
 local input_check
 local numberString = { [1] = "", [2] = "", }
+local Idstring = ""
 local setting_index         --设置按键的索引
 local switch_page_index = 1 --当前转换桌页索引
 local switch_page_num = 1   --最多转换桌页
 local bag_page_index = 1    --当前背包页索引
 local bag_page_num = 1      --最多背包页
 local bag_item_index = 1    -- 背包道具索引
+local search_index = 1      --搜索索引
 local current_num           -- 当前选中道具索引
 local current_sprite        -- 当前选中道具精灵
 local current_emc           -- 当前选中道具EMC值
 local current_item_id       -- 当前选中道具ID
 local chose_type            -- 0-- 当前选中类型（1：背包道具，2：转换桌道具，3：按钮 ，4：设置键）
-local emc_num = 100
-local temp_fire_delay
+local emc_num = 0
 local stastic_pos
 local items_table = {}                     --背包道具表
 local switch_table = {}                    --桌中有的道具
+local search_table = {}                    --搜索表
 emc_table = {}                             --EMC值表
 local settings = {
     switch_table_permenent_memory = false, --转换桌道具是否永久记忆
@@ -45,7 +48,6 @@ local settings = {
     switch_table_spawn = true              --是否开局生成转换桌
 }
 local Data = {}
-
 
 function EE:TAB_Switch() --TAB模式切换
     stastic_pos = Vector(Isaac.GetScreenWidth() / 2 - 114, Isaac.GetScreenHeight() / 2 - 67)
@@ -89,8 +91,16 @@ function EE:TAB_UI_Render() --按下Tab后UI渲染
                     p.sprite:Render(p.pos + stastic_pos)
                 end
             end
+            for i, p in pairs(search_render) do
+                if search_table[i] then
+                    p.sprite:Render(p.pos + stastic_pos)
+                end
+            end
+            search_button:Render(stastic_pos + Vector(106, 19))
             setting_button:Render(Vector(230, 0) + stastic_pos)
             font:DrawStringUTF8("EMC:" .. emc_num, stastic_pos.X + 25 + #tostring(emc_num) * 3, stastic_pos.Y + 100,
+                KColor.White, 1, true)
+            font:DrawStringUTF8(Idstring, stastic_pos.X + 76 + #Idstring * 3, stastic_pos.Y + 5,
                 KColor.White, 1, true)
         elseif setting_ui_open then
             setting_ui:Render(stastic_pos)
@@ -171,23 +181,29 @@ function EE:Remove_Add() --道具买卖/UI交互
     if Tab_Confirm then
         for pl = 0, Game():GetNumPlayers() - 1 do
             local player = Game():GetPlayer(pl)
-            if not setting_ui_open then
-                if Input.IsMouseBtnPressed(Mouse.MOUSE_BUTTON_LEFT) and btn_pre == false then
-                    if Mouse_Pos_Pos_Check(Input.GetMousePosition(true), item_render, 1) then
+            if not setting_ui_open then                                                       --背包界面
+                if Input.IsMouseBtnPressed(Mouse.MOUSE_BUTTON_LEFT) and btn_pre == false then --按下位置检测
+                    if Mouse_Pos_Pos_Check(Input.GetMousePosition(true), item_render, 1, stastic_pos) then
                         chose_type = 1
-                    elseif Mouse_Pos_Pos_Check(Input.GetMousePosition(true), switch_render, 2) then
+                    elseif Mouse_Pos_Pos_Check(Input.GetMousePosition(true), switch_render, 2, stastic_pos) then
                         chose_type = 2
-                    elseif Mouse_Pos_Pos_Check(Input.GetMousePosition(true), button_render, 3) then
+                    elseif Mouse_Pos_Pos_Check(Input.GetMousePosition(true), search_render, 3, stastic_pos) then
                         chose_type = 3
-                    elseif Mouse_Pos_But_Check(Input.GetMousePosition(true), Vector(230, 0) + stastic_pos, 2) then
+                    elseif Mouse_Pos_Pos_Check(Input.GetMousePosition(true), button_render, 4, stastic_pos) then
                         chose_type = 4
+                    elseif Mouse_Pos_But_Check(Input.GetMousePosition(true), Vector(106, 19) + stastic_pos, 2) then
+                        chose_type = 5
+                    elseif Mouse_Pos_But_Check(Input.GetMousePosition(true), Vector(76, 5) + stastic_pos, 4) then
+                        chose_type = 6
+                    elseif Mouse_Pos_But_Check(Input.GetMousePosition(true), Vector(230, 0) + stastic_pos, 2) then
+                        chose_type = 7
                     else
                         chose_type = 0
                     end
                 end
-                if chose_type == 1 then
+                if chose_type == 1 then --从背包卖
                     for i, p in pairs(item_render) do
-                        if Mouse_Pos_But_Check(Input.GetMousePosition(true), p.pos + stastic_pos, 1) and items_table[i + (bag_page_index - 1) * 27] and emc_table[items_table[i + (bag_page_index - 1) * 27]] ~= 0 and Input.IsMouseBtnPressed(Mouse.MOUSE_BUTTON_LEFT) and not btn_pre then --拿起背包道具
+                        if Mouse_Pos_But_Check(Input.GetMousePosition(true), p.pos + stastic_pos, 1) and items_table[i + (bag_page_index - 1) * 27] and emc_table[items_table[i + (bag_page_index - 1) * 27]] ~= 0 and Input.IsMouseBtnPressed(Mouse.MOUSE_BUTTON_LEFT) and not btn_pre then
                             current_num = i
                             current_emc = emc_table[items_table[current_num + (bag_page_index - 1) * 27]]
                             current_item_id = items_table[current_num + (bag_page_index - 1) * 27]
@@ -197,7 +213,7 @@ function EE:Remove_Add() --道具买卖/UI交互
                                 EID:displayPermanentText(EID:getDescriptionObj(5, 100,
                                     items_table[current_num + (bag_page_index - 1) * 27], nil, true))
                             end
-                        elseif Mouse_Pos_But_Check(Input.GetMousePosition(true), sell_pos + stastic_pos, 2) and btn_pre and not Input.IsMouseBtnPressed(Mouse.MOUSE_BUTTON_LEFT) then --卖掉背包道具
+                        elseif Mouse_Pos_But_Check(Input.GetMousePosition(true), sell_pos + stastic_pos, 2) and btn_pre and not Input.IsMouseBtnPressed(Mouse.MOUSE_BUTTON_LEFT) then
                             if Isaac.GetItemConfig():GetCollectible(items_table[current_num + (bag_page_index - 1) * 27]):HasTags(ItemConfig.TAG_BOOK) then
                                 player:RemoveCollectible(items_table[current_num + (bag_page_index - 1) * 27], true,
                                     ActiveSlot.SLOT_PRIMARY, false)
@@ -213,18 +229,16 @@ function EE:Remove_Add() --道具买卖/UI交互
                             end
                             AddIfNotExists(switch_table, items_table[current_num + (bag_page_index - 1) * 27])
                             btn_pre = false
-                            anm_load = true
-                        elseif not Mouse_Pos_Pos_Check(Input.GetMousePosition(true), item_render, 1) and btn_pre and not Input.IsMouseBtnPressed(Mouse.MOUSE_BUTTON_LEFT) then --无效果
+                        elseif not Mouse_Pos_Pos_Check(Input.GetMousePosition(true), item_render, 1, stastic_pos) and btn_pre and not Input.IsMouseBtnPressed(Mouse.MOUSE_BUTTON_LEFT) then
                             if EID and settings.EID_connect_confirm then
                                 EID:hidePermanentText()
                             end
                             btn_pre = false
                         end
                     end
-                    anm_load = true
-                elseif chose_type == 2 then
+                elseif chose_type == 2 then --从转换桌买
                     for i, p in pairs(switch_render) do
-                        if Mouse_Pos_But_Check(Input.GetMousePosition(true), p.pos + stastic_pos, 2) and switch_table[i + (switch_page_index - 1) * 17] and Input.IsMouseBtnPressed(Mouse.MOUSE_BUTTON_LEFT) and not btn_pre then --拿起转换台上道具
+                        if Mouse_Pos_But_Check(Input.GetMousePosition(true), p.pos + stastic_pos, 2) and switch_table[i + (switch_page_index - 1) * 17] and Input.IsMouseBtnPressed(Mouse.MOUSE_BUTTON_LEFT) and not btn_pre then
                             current_num = i
                             current_emc = emc_table[switch_table[current_num + (switch_page_index - 1) * 17]]
                             current_item_id = switch_table[current_num + (switch_page_index - 1) * 17]
@@ -234,7 +248,7 @@ function EE:Remove_Add() --道具买卖/UI交互
                                 EID:displayPermanentText(EID:getDescriptionObj(5, 100,
                                     switch_table[current_num + (switch_page_index - 1) * 17], nil, true))
                             end
-                        elseif Mouse_Pos_Pos_Check(Input.GetMousePosition(true), item_render, 1) and btn_pre and not Input.IsMouseBtnPressed(Mouse.MOUSE_BUTTON_LEFT) then --买出成功
+                        elseif Mouse_Pos_Pos_Check(Input.GetMousePosition(true), item_render, 1, stastic_pos) and btn_pre and not Input.IsMouseBtnPressed(Mouse.MOUSE_BUTTON_LEFT) then
                             if emc_num >= emc_table[switch_table[current_num + (switch_page_index - 1) * 17]] then
                                 if player:GetPlayerType() == PlayerType.PLAYER_ISAAC_B then
                                     if T_Isaac_less_than_8(player) then
@@ -257,15 +271,56 @@ function EE:Remove_Add() --道具买卖/UI交互
                                 EID:hidePermanentText()
                             end
                             btn_pre = false
-                        elseif not Mouse_Pos_Pos_Check(Input.GetMousePosition(true), switch_render, 2) and btn_pre and not Input.IsMouseBtnPressed(Mouse.MOUSE_BUTTON_LEFT) then --买出失败
+                        elseif not Mouse_Pos_Pos_Check(Input.GetMousePosition(true), switch_render, 2, stastic_pos) and btn_pre and not Input.IsMouseBtnPressed(Mouse.MOUSE_BUTTON_LEFT) then
                             if EID and settings.EID_connect_confirm then
                                 EID:hidePermanentText()
                             end
                             btn_pre = false
                         end
                     end
-                    anm_load = true
-                elseif chose_type == 3 then
+                elseif chose_type == 3 then --从搜索栏买
+                    for i, p in pairs(search_render) do
+                        if Mouse_Pos_But_Check(Input.GetMousePosition(true), p.pos + stastic_pos, 2) and search_table[i] and Input.IsMouseBtnPressed(Mouse.MOUSE_BUTTON_LEFT) and not btn_pre then
+                            current_num = i
+                            current_emc = emc_table[search_table[current_num]]
+                            current_item_id = search_table[current_num]
+                            current_sprite = p.sprite
+                            btn_pre = true
+                            if EID and settings.EID_connect_confirm then
+                                EID:displayPermanentText(EID:getDescriptionObj(5, 100,
+                                    search_table[current_num], nil, true))
+                            end
+                        elseif Mouse_Pos_Pos_Check(Input.GetMousePosition(true), item_render, 1, stastic_pos) and btn_pre and not Input.IsMouseBtnPressed(Mouse.MOUSE_BUTTON_LEFT) then
+                            if emc_num >= emc_table[search_table[current_num]] then
+                                if player:GetPlayerType() == PlayerType.PLAYER_ISAAC_B then
+                                    if T_Isaac_less_than_8(player) then
+                                        emc_num = emc_num -
+                                            emc_table[search_table[current_num]]
+                                        player:AddCollectible(search_table[current_num], 0,
+                                            false)
+                                    end
+                                elseif (player:GetPlayerType() == PlayerType.PLAYER_BLUEBABY_B and not player:HasCollectible(715) and search_table[current_num] == 715) or (player:GetPlayerType() == PlayerType.PLAYER_CAIN_B and not player:HasCollectible(710) and search_table[current_num] == 710) or (player:GetPlayerType() == PlayerType.PLAYER_MAGDALENE_B and not player:HasCollectible(45) and search_table[current_num] == 45) then
+                                    player:AddCollectible(search_table[current_num], 0,
+                                        false, 2, 0)
+                                else
+                                    emc_num = emc_num -
+                                        emc_table[search_table[current_num]]
+                                    player:AddCollectible(search_table[current_num], 0,
+                                        false)
+                                end
+                            end
+                            if EID and settings.EID_connect_confirm then
+                                EID:hidePermanentText()
+                            end
+                            btn_pre = false
+                        elseif not Mouse_Pos_Pos_Check(Input.GetMousePosition(true), switch_render, 2, stastic_pos) and btn_pre and not Input.IsMouseBtnPressed(Mouse.MOUSE_BUTTON_LEFT) then
+                            if EID and settings.EID_connect_confirm then
+                                EID:hidePermanentText()
+                            end
+                            btn_pre = false
+                        end
+                    end
+                elseif chose_type == 4 then --翻页
                     for i, anm in pairs(button_render) do
                         if Mouse_Pos_But_Check(Input.GetMousePosition(true), anm.pos + stastic_pos, 1) and Input.IsMouseBtnPressed(Mouse.MOUSE_BUTTON_LEFT) and not btn_pre then
                             anm.sprite:Play("Press", true)
@@ -277,8 +332,34 @@ function EE:Remove_Add() --道具买卖/UI交互
                             Page_Switch()
                         end
                     end
-                    anm_load = true
-                elseif chose_type == 4 then
+                elseif chose_type == 5 then --搜索物品
+                    if Mouse_Pos_But_Check(Input.GetMousePosition(true), Vector(106, 19) + stastic_pos, 2) and Input.IsMouseBtnPressed(Mouse.MOUSE_BUTTON_LEFT) and not btn_pre then
+                        search_button:Play("Press", true)
+                        btn_pre = true
+                    elseif btn_pre and not Input.IsMouseBtnPressed(Mouse.MOUSE_BUTTON_LEFT) then
+                        search_button:Play("Idle", true)
+                        if emc_table[tonumber(Idstring)] and IsIdInSwitchTable(tonumber(Idstring), switch_table) then
+                            search_table[search_index] = tonumber(Idstring)
+                            search_index = search_index + 1
+                            input_check = false
+                            IsReading = false
+                            Idstring = ""
+                            if search_index > 9 then
+                                search_index = 1
+                            end
+                        end
+                        btn_pre = false
+                    end
+                elseif chose_type == 6 then --输入Id
+                    if Mouse_Pos_But_Check(Input.GetMousePosition(true), Vector(76, 5) + stastic_pos, 4) and Input.IsMouseBtnPressed(Mouse.MOUSE_BUTTON_LEFT) and not btn_pre then
+                        input_check = 1
+                        IsReading = true
+                        btn_pre = true
+                        setting_index = 1
+                    elseif btn_pre and not Input.IsMouseBtnPressed(Mouse.MOUSE_BUTTON_LEFT) and setting_index == 1 then
+                        btn_pre = false
+                    end
+                elseif chose_type == 7 then --设置的打开
                     if Mouse_Pos_But_Check(Input.GetMousePosition(true), Vector(230, 0) + stastic_pos, 1) and Input.IsMouseBtnPressed(Mouse.MOUSE_BUTTON_LEFT) and not btn_pre then
                         setting_button:Play("Press", true)
                         btn_pre = true
@@ -288,8 +369,7 @@ function EE:Remove_Add() --道具买卖/UI交互
                         btn_pre = false
                     end
                 end
-                anm_load = true
-                if btn_pre and (chose_type == 1 or chose_type == 2) then
+                if btn_pre and (chose_type == 1 or chose_type == 2 or chose_type == 3) then --拿起物品渲染
                     font:DrawStringUTF8("Id:" .. current_item_id, Isaac.WorldToScreen(Input.GetMousePosition(true)).X,
                         Isaac.WorldToScreen(Input.GetMousePosition(true)).Y + 20, KColor.White, 1, true)
                     font:DrawStringUTF8("EMC:" .. current_emc, Isaac.WorldToScreen(Input.GetMousePosition(true)).X,
@@ -297,8 +377,25 @@ function EE:Remove_Add() --道具买卖/UI交互
                         true)
                     current_sprite:Render(Isaac.WorldToScreen(Input.GetMousePosition(true)))
                 end
-            elseif setting_ui_open then
-                for i, p in pairs(setting_input_pos) do
+                if input_check then --输入Id
+                    writing_spark:Play("Idle")
+                    writing_spark:Render(Vector(76, 3) + stastic_pos +
+                        Vector(#Idstring * 6, 0))
+                    if IsReading then
+                        for i = 0, 9 do
+                            local keyName = "KEY_" .. i
+                            if Input.IsButtonTriggered(Keyboard[keyName], player.ControllerIndex) then
+                                Idstring = Idstring .. tostring(i)
+                            end
+                        end
+                        if Input.IsButtonTriggered(Keyboard.KEY_BACKSPACE, player.ControllerIndex) then
+                            Idstring = Idstring:sub(1, -2)
+                        end
+                    end
+                end
+                anm_load = true
+            elseif setting_ui_open then                 --设置界面
+                for i, p in pairs(setting_input_pos) do --输入位置
                     if Mouse_Pos_But_Check(Input.GetMousePosition(true), p + stastic_pos - Vector(2, 2), 3) and Input.IsMouseBtnPressed(Mouse.MOUSE_BUTTON_LEFT) and not btn_pre then
                         input_check = i
                         IsReading = true
@@ -308,7 +405,7 @@ function EE:Remove_Add() --道具买卖/UI交互
                         btn_pre = false
                     end
                 end
-                if input_check then
+                if input_check then --输入检测
                     writing_spark:Play("Idle")
                     writing_spark:Render(setting_input_pos[input_check] + stastic_pos +
                         Vector(#numberString[input_check] * 6, 0))
@@ -324,7 +421,7 @@ function EE:Remove_Add() --道具买卖/UI交互
                         end
                     end
                 end
-                for i, p in pairs(settings_render) do
+                for i, p in pairs(settings_render) do --按键检测及逻辑
                     if Mouse_Pos_But_Check(Input.GetMousePosition(true), p.pos + stastic_pos, 1) and Input.IsMouseBtnPressed(Mouse.MOUSE_BUTTON_LEFT) and not btn_pre then
                         p.sprite:Play("Press", true)
                         current_num = i
@@ -357,8 +454,9 @@ function EE:Remove_Add() --道具买卖/UI交互
                         elseif current_num == 3 then
                             if emc_table[tonumber(numberString[1])] then
                                 emc_table[tonumber(numberString[1])] = emc_table_init[tonumber(numberString[1])] or
-                                mod_emc_table_init[tonumber(numberString[1])] or
-                                (Isaac.GetItemConfig():GetCollectible(tonumber(numberString[1]) or 1).Quality + 1) * 20
+                                    mod_emc_table_init[tonumber(numberString[1])] or
+                                    (Isaac.GetItemConfig():GetCollectible(tonumber(numberString[1]) or 1).Quality + 1) *
+                                    20
                                 EID_Render = false
                                 EID:hidePermanentText()
                                 numberString = { [1] = "", [2] = "", }
@@ -379,6 +477,7 @@ function EE:Remove_Add() --道具买卖/UI交互
                         btn_pre = false
                     end
                 end
+                anm_load = true
             end
         end
     end
@@ -431,6 +530,12 @@ function EE:Anm2Load() --anm2 sheet的替换
                 anm.sprite:LoadGraphics()
             end
         end
+        for i, anm in pairs(search_render) do
+            if search_table[i] then
+                anm.sprite:ReplaceSpritesheet(0, Isaac.GetItemConfig():GetCollectible(search_table[i]).GfxFileName, true)
+                anm.sprite:LoadGraphics()
+            end
+        end
         anm_load = false
     end
 end
@@ -447,16 +552,22 @@ function EE:Begining_Load() --常用sprite加载
         setting_button:Load("gfx/ui/button_settings.anm2", true)
         setting_ui:Load("gfx/ui/settings.anm2", true)
         writing_spark:Load("gfx/ui/writing_spark.anm2", true)
+        search_button:Load("gfx/ui/button_search.anm2", true)
         bag_ui:Play("Idle", true)
         switch_item:Play("Icon", true)
         bag_item:Play("Icon", true)
         setting_button:Play("Idle", true)
         setting_ui:Play("Idle", true)
+        search_button:Play("Idle", true)
         for _, anm in pairs(item_render) do
             anm.sprite:Load("gfx/ui/Item_ID.anm2", true)
             anm.sprite:Play("Icon", true)
         end
         for _, anm in pairs(switch_render) do
+            anm.sprite:Load("gfx/ui/Item_ID.anm2", true)
+            anm.sprite:Play("Icon", true)
+        end
+        for _, anm in pairs(search_render) do
             anm.sprite:Load("gfx/ui/Item_ID.anm2", true)
             anm.sprite:Play("Icon", true)
         end
@@ -560,69 +671,7 @@ function EE:ST_Beginning(_, bool) --开局生成转换桌
 end
 
 EE:AddCallback(ModCallbacks.MC_POST_GAME_STARTED, EE.ST_Beginning)
-function T_Isaac_less_than_8(player) --堕化以撒道具数检测
-    local num = 0
-    for col_i = 1, Isaac.GetItemConfig():GetCollectibles().Size - 1 do
-        if ItemConfig.Config.IsValidCollectible(col_i) then
-            for has_i = 1, player:GetCollectibleNum(col_i, true) do
-                num = num + 1
-            end
-        end
-    end
-    if num < 8 then
-        return true
-    else
-        return false
-    end
-end
-
-function Mouse_Pos_But_Check(Mouse_Pos, Aim_pos, i) --检测鼠标位置（即在某小格）
-    local mous_pos = Isaac.WorldToScreen(Mouse_Pos)
-    if i == 1 then
-        if mous_pos.X >= Aim_pos.X and mous_pos.X <= Aim_pos.X + 13 then
-            if mous_pos.Y >= Aim_pos.Y and mous_pos.Y <= Aim_pos.Y + 16 then
-                return true
-            else
-                return false
-            end
-        end
-    elseif i == 2 then
-        if mous_pos.X >= Aim_pos.X and mous_pos.X <= Aim_pos.X + 17 then
-            if mous_pos.Y >= Aim_pos.Y and mous_pos.Y <= Aim_pos.Y + 17 then
-                return true
-            else
-                return false
-            end
-        end
-    elseif i == 3 then
-        if mous_pos.X >= Aim_pos.X and mous_pos.X <= Aim_pos.X + 72 then
-            if mous_pos.Y >= Aim_pos.Y and mous_pos.Y <= Aim_pos.Y + 20 then
-                return true
-            else
-                return false
-            end
-        end
-    end
-end
-
-function Mouse_Pos_Pos_Check(Mouse_Pos, table, i) --检测鼠标位置（即在某区域）
-    local mous_pos = Isaac.WorldToScreen(Mouse_Pos)
-    local temp = 0
-    for _, p in pairs(table) do
-        if mous_pos.X >= (p.pos + stastic_pos).X and mous_pos.X <= (p.pos + stastic_pos).X + 17 then
-            if mous_pos.Y >= (p.pos + stastic_pos).Y and mous_pos.Y <= (p.pos + stastic_pos).Y + 17 then
-                temp = temp + 1
-            else
-                temp = temp
-            end
-        end
-    end
-    if temp > 0 then
-        return i
-    else
-        return false
-    end
-end
+-------------------------------------
 
 function Page_Switch() --背包/转换桌切换
     if current_num == 1 then
@@ -659,59 +708,6 @@ function AddIfNotExists(tbl, num) --向表中加入不存在元素
         end
     end
     table.insert(tbl, num)
-end
-
-function InferOriginalPrice(couponCount, discountedPrice) --原价计算函数
-    local originalPrices = {}
-    if type(couponCount) ~= "number" or type(discountedPrice) ~= "number"
-        or couponCount < 1 or discountedPrice < 1
-        or math.floor(couponCount) ~= couponCount
-        or math.floor(discountedPrice) ~= discountedPrice then
-        return originalPrices
-    end
-
-    if couponCount == 1 then
-        local minP = 2 * discountedPrice
-        local maxP = 2 * discountedPrice + 1
-        for p = minP, maxP do
-            table.insert(originalPrices, p)
-        end
-    else
-        local divisor = couponCount + 1
-        local minP = (discountedPrice - 1) * divisor + 1
-        local maxP = discountedPrice * divisor
-        minP = math.max(minP, 1)
-        for p = minP, maxP do
-            table.insert(originalPrices, p)
-        end
-    end
-
-    return originalPrices
-end
-
-function RemoveAfterIndex(tbl, num) --取消订阅后初始化EMC
-    local toRemove = {}
-    for key, _ in pairs(tbl) do
-        if type(key) == "number" and key > num then
-            table.insert(toRemove, key)
-        end
-    end
-    for _, key in pairs(toRemove) do
-        tbl[key] = nil
-    end
-
-    return tbl
-end
-
-function MergeTables(t1, t2) --覆盖函数
-    local result = {}
-    for k, v in pairs(t1) do
-        result[k] = v
-    end
-    for k, v in pairs(t2) do
-        result[k] = v
-    end
-    return result
 end
 
 if EID then

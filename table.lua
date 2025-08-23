@@ -49,6 +49,19 @@ switch_render = {
     { pos = Vector(158, 51), sprite = Sprite(), }, --c
 
 }
+search_render = {
+
+    { pos = Vector(42, 22), sprite = Sprite(), },   -- u（上）
+    { pos = Vector(61, 30), sprite = Sprite(), },   -- ur（右上）
+    { pos = Vector(69, 49), sprite = Sprite(), },   -- r（右）
+    { pos = Vector(61, 68), sprite = Sprite(), },   -- dr（右下）
+    { pos = Vector(42, 76), sprite = Sprite(), },   -- d（下）
+    { pos = Vector(23, 68), sprite = Sprite(), },   -- dl（左下）
+    { pos = Vector(15, 49), sprite = Sprite(), },   -- l（左）
+    { pos = Vector(23, 30), sprite = Sprite(), },   -- ul（左上）
+    { pos = Vector(42, 49), sprite = Sprite(), },   -- c（中心）
+}
+
 settings_render = {
     {
         name = "search",
