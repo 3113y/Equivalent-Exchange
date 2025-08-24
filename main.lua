@@ -98,7 +98,7 @@ function EE:TAB_UI_Render() --按下Tab后UI渲染
             end
             search_button:Render(stastic_pos + Vector(106, 19))
             setting_button:Render(Vector(230, 0) + stastic_pos)
-            font:DrawStringUTF8("EMC:" .. emc_num, stastic_pos.X + 25 + #tostring(emc_num) * 3, stastic_pos.Y + 100,
+            font:DrawStringUTF8("EMC:" .. emc_num, stastic_pos.X + 21 + #tostring(emc_num) * 3, stastic_pos.Y + 100,
                 KColor.White, 1, true)
             font:DrawStringUTF8(Idstring, stastic_pos.X + 76 + #Idstring * 3, stastic_pos.Y + 5,
                 KColor.White, 1, true)
