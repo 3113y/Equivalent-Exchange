@@ -1,3 +1,3 @@
 <items gfxroot="gfx/items/" deathanm2="gfx/death items.anm2" version="1">
-   <passive id="0" name="Transmutation Tablet" gfx="transmutation_tablet.png" description="The magical product of alchemy, whose functions far surpass Tainted Cain's Bag of Crafting" quality="3" shopprice="64" devilprice = "6" />
+   <passive id="0" name="Transmutation Tablet" gfx="transmutation_tablet.png" description="The magical product of alchemy, whose functions far surpass Tainted Cain's Bag of Crafting" quality="3" tags = "quest" shopprice="64" devilprice = "6" />
 </items>

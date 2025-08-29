@@ -3,8 +3,41 @@
     <name>Equivalent Exchange</name>
     <directory>equivalent exchange</directory>
     <id>3552036966</id>
-    <description></description>
-    <version>1.6</version>
+    <description>[h2]Pre-Game Reminders[/h2]
+
+[list]
+
+[*]This mod has not yet been tested on The Binding of Isaac: Rebirth - Repentance+ (Repentance Plus). Please play cautiously if using it with Repentance+.
+
+[*]This mod requires mouse operation to use. If you are unsure how to enable or use the mouse, please [url=https://www.bilibili.com/video/BV1P8411D7S4]click here[/url] to view the tutorial.
+
+[*]This mod does not require any prerequisite mods, but it has cross-compatibility with EID (External Item Descriptions).
+
+[/list]
+
+[h2]About This Mod[/h2]
+Inspired by the Minecraft mod [url=https://www.mcmod.cn/class/353.html]Equivalent Exchange[/url], this mod will spawn a Transmutation Table by default at the start of a run. It is recommended that you pick it up first. After picking it up, click the gear button in the top-right corner of the UI to access the settings (supports Chinese and English; other languages will default to English). The operation of this mod is similar to that of the Transmutation Table in Minecraft. For detailed instructions, please [url=https://www.bilibili.com/video/BV1bXePzAE9i]click here[/url] to watch the tutorial.
+Additionally, the natural spawn weights of the Transmutation Table are as follows: Boss Room (0.2), Chest (0.5), Shop (0.5), Secret Room (0.1), and Devil Room (0.2).
+
+The Transmutation Table costs 64 coins and is not affected by Steam Sale items. [strike]This is because Minecraft is not sold on Steam[/strike] (In reality, due to limitations in the original [spoiler]conceptual[/spoiler] API—specifically, its inability to read the defined prices of items—there may be price fluctuations when multiple Steam Sale items are owned. [spoiler]In truth, it is not necessary to reverse-engineer methods to accurately modify the price of a single specific item, but bulk price modification is not possible. This note is included solely to criticize the Isaac API.[/spoiler])
+The EMC value of most items is calculated as (Quality + 1) × 20. Adjustments have been made to the EMC values of certain items whose power does not match their quality. Special items without EMC values (such as quest items) cannot be sold.
+
+[b]Please Note[/b]: When you unsubscribe from [b]any[/b] mod, this mod will [b]fully[/b] reset the EMC values of all non-vanilla items and the items stored in the Transmutation Table to prevent bugs (the EMC values will reset to their modified defaults).
+
+If you have feedback on an item’s EMC value or encounter a bug, please post your comments in the discussion section.
+
+Regarding charge levels and set bonuses when purchasing items: When using the AddCollectible() function to add items, I have set the FirstTimePickingUp variable to false. This means that set bonuses will not trigger even if you purchase more than three items from a set, and items that grant additional bombs (for example) will not stack multiple times. This is normal behavior. Additionally, to prevent exploitation, the initial charge level of active items is set to 0 upon purchase. Furthermore, the &quot;item consumption&quot; mechanic is a deliberate design choice of mine, not a bug.
+
+(For information on mod APIs: [url=https://github.com/3113y/Equivalent-Exchange/blob/main/README.md]About Mod APIs[/url])
+
+[h2]Upcoming Updates[/h2]
+
+Support for custom settings: An option to enable/disable EMC reduction when selling items, and to adjust the reduction amount based on the item’s EMC value [spoiler](similar to personal income tax)[/spoiler].
+
+[h2]Current Bugs/Issues[/h2]
+
+Set bonuses do not activate correctly when purchasing three or more items from the same set at once via the Transmutation Table.</description>
+    <version>1.7</version>
     <visibility>Public</visibility>
     <tag id="Lua"/>
     <tag id="Items"/>
